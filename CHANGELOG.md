@@ -1,5 +1,13 @@
 # 变更日志
 
+## v1.4 (2026-11-22)
+
+- 修复新版模型归类：`gemini-pro-orchestrator-g1-pro`（显示名 `Orchestrator (Argon)`）不再被塞进 Gemini 桶，Argon 优先按显示名判定。
+- Gemini 存在 Neon / Hydrogen / Flash 等多档独立额度，改用「最高剩余」避免被其中一档拉低；Claude / GPT / 4Argon 仍取最低。
+- 接口返回 `errorMessage` 或取数异常时，电池显示 `!` 并在悬浮明细里写明原因，不再静默显示 `--`。
+- 实测真实数据：Claude 14% / GPT 14% / Gemini 100% / 4Argon 48%，与接口一致。
+
+
 ## v1.3 (2026-11-19)
 
 - 适配 Antigravity **v2.33.0**：补齐新版设置页按钮与文案汉化（Give Feedback、Voice mode、Conversation Steps、Installed MCP Servers、File Access Rules、Model Quota、快捷键命令等约 60 条）。

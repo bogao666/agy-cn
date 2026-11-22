@@ -1,6 +1,6 @@
 # 反重力中文增强补丁（agy-cn）
 
-[![Version](https://img.shields.io/badge/version-v1.3-4A9EFF)](../../releases)
+[![Version](https://img.shields.io/badge/version-v1.4-4A9EFF)](../../releases)
 [![Platform](https://img.shields.io/badge/platform-Windows-blue)](#安装)
 [![Antigravity](https://img.shields.io/badge/Antigravity-v2.33.0-A98BFF)](https://antigravity.google)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)

@@ -671,12 +671,23 @@
 
   /* ============================ 3. 额度小组件 ============================ */
   const VENDORS = [
-    { id: 'claude', name: 'Claude', color: '#FF8A3D', test: /^claude/i },
-    { id: 'gpt', name: 'GPT', color: '#F0F0F0', test: /^(gpt|openai)/i },
-    { id: 'gemini', name: 'Gemini', color: '#A98BFF', test: /^gemini(?!.*argon)/i },
-    // Gemini 4 Argon 有独立周额度，单独一块电池；负向断言保证 argon 不落进 Gemini 桶
-    { id: 'argon', name: '4Argon', color: '#4A9EFF', test: /argon/i },
+    { id: 'claude', name: 'Claude', color: '#FF8A3D', agg: 'min' },
+    { id: 'gpt', name: 'GPT', color: '#F0F0F0', agg: 'min' },
+    { id: 'gemini', name: 'Gemini', color: '#A98BFF', agg: 'max' },
+    // Gemini 4 Argon 有独立周额度，单独一块电池
+    { id: 'argon', name: '4Argon', color: '#4A9EFF', agg: 'min' },
   ];
+
+  // 归类同时看 id 和显示名；argon 优先级最高，避免 Orchestrator (Argon) 这类
+  // id 为 gemini-pro-orchestrator-g1-pro 的模型被塞进 Gemini 桶、污染其额度。
+  function vendorOf(id, label) {
+    const s = ((id || '') + ' ' + (label || '')).toLowerCase();
+    if (/argon/.test(s)) return 'argon';
+    if (/claude/.test(s)) return 'claude';
+    if (/(^|[^a-z])gpt|openai/.test(s)) return 'gpt';
+    if (/gemini/.test(s)) return 'gemini';
+    return null;
+  }
 
   const state = {
     vendors: {},          // id -> {level, source, reset, models:[]}
@@ -743,7 +754,13 @@
 
   function applyStatus(json) {
     const us = json && (json.userStatus || json);
-    if (!us) return;
+    if (!us) { state.error = new Error('接口返回空数据'); return; }
+    const apiError = us.cascadeModelConfigData && us.cascadeModelConfigData.errorMessage;
+    if (apiError) {
+      state.error = new Error(String(apiError).split('\n')[0].slice(0, 160));
+      state.vendors = {};
+      return;
+    }
     const ps = us.planStatus || {};
     const pi = ps.planInfo || {};
     state.plan = pi.planName || '';
@@ -759,8 +776,7 @@
     for (const m of cfgs) {
       const id = m.modelId || '';
       const label = m.label || '';
-      // modelId 和显示名都参与匹配，防止其中一边不带 argon 字样时漏归
-      const v = VENDORS.find((x) => x.test.test(id) || x.test.test(label));
+      const v = VENDORS.find((x) => x.id === vendorOf(id, label));
       if (!v) continue;
       const q = m.quotaInfo || {};
       const frac = typeof q.remainingFraction === 'number' ? q.remainingFraction : null;
@@ -776,7 +792,7 @@
       const bucket = next[v.id];
       const fracs = bucket.models.map((m) => m.frac).filter((f) => typeof f === 'number');
       if (fracs.length) {
-        bucket.level = Math.min(...fracs);
+        bucket.level = v.agg === 'max' ? Math.max(...fracs) : Math.min(...fracs);
         bucket.source = 'model';
         bucket.exhausted = bucket.exhausted || bucket.level <= 0;
       } else if (bucket.models.length && creditRatio !== null) {
@@ -845,7 +861,7 @@
       const fill = item.querySelector('.agyq-fill');
       const visual = lv === null ? 0 : Math.max(lv > 0 ? 0.06 : 0, Math.min(1, lv));
       fill.style.width = (visual * 100).toFixed(1) + '%';
-      pct.textContent = fmtPct(lv);
+      pct.textContent = state.error && !state.updatedAt ? '!' : fmtPct(lv);
       let st = 'ok';
       if (lv === null) st = 'unknown';
       else if (lv <= 0.001) st = 'empty';
@@ -877,6 +893,7 @@
       <h4>模型额度<span>${state.plan ? state.plan + ' 套餐' : ''}</span></h4>
       ${rows}
       ${creditLine ? '<div class="agyq-sep"></div>' + creditLine : ''}
+      ${state.error ? `<div class="agyq-row" style="margin-top:6px"><i style="color:#ff8a8a">取数失败：${String(state.error.message || state.error).slice(0, 80)}</i></div>` : ''}
       <div class="agyq-foot"><span>更新 ${updated}</span><span>点击立即刷新</span></div>`;
   }
 
