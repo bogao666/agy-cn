@@ -1,98 +1,95 @@
-# 反重力中文增强补丁（agy-cn）
+# Antigravity 反重力增强套件
 
-[![Version](https://img.shields.io/badge/version-v1.4-4A9EFF)](../../releases)
+[![Version](https://img.shields.io/badge/version-v1.6-4A9EFF)](../../releases)
 [![Platform](https://img.shields.io/badge/platform-Windows-blue)](#安装)
 [![Antigravity](https://img.shields.io/badge/Antigravity-v2.33.0-A98BFF)](https://antigravity.google)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-给 **Google Antigravity 桌面版** 加两样东西：
+给 **Google Antigravity 桌面版** 做界面增强。一个仓库，两个组件：
 
-> 🔁 **本项目长期维护**：跟随 Antigravity 版本持续适配更新，欢迎 [Issues](../../issues) 反馈问题和需求。
+| 组件 | 作用 | 状态 |
+| --- | --- | --- |
+| **顶部额度电池** | 标题栏实时显示 Claude / Gemini 剩余额度，顺带做界面汉化 | 当前 v1.6 |
+| **流体挡位插件** | 模型选择器右侧的 WebGL2 粒子流体四档调节器（LOW / MED / HIGH / EXTRA） | 1.0.0 |
 
-1. **顶栏模型额度小电池** —— Claude（橙）/ GPT（白）/ Gemini（紫）/ 4Argon（蓝），实时显示各家剩余额度，鼠标悬停看明细，点一下立刻刷新。
-2. **基础汉化** —— 顶栏菜单、侧栏、输入框、额度提示、常用按钮、整页设置界面换成中文，**不碰对话正文、代码和输入框里的内容**。
+> 两个组件都会修改 `resources/app.asar` 里的 `dist/preload.js`，**安装顺序很重要**（见下方）。
 
-![额度小电池](preview.png)
+![额度电池](preview.png)
+
+---
+
+## 组件一：顶部额度电池（agy-cn）
+
+- 顶栏右上角显示 **Claude（橙）** 与 **Gemini（紫）** 两块小电池，填充比例即真实剩余额度，鼠标悬停看明细，点击立刻刷新。
+- 数据来自应用自己的 `GetUserStatus` 接口：优先读 `clientModelConfigs[].quotaInfo.remainingFraction`，没有独立模型额度时回退到共享积分。每 60 秒自动刷新，切回窗口也会刷新。
+- 官网把 Neon / Argon / Hydrogen / Flash 的额度合并后，组件会**自动隐藏重复的 Argon 电池**；以后额度拆分又会自动恢复。
+- GPT 电池已按需求移除。
+- 附带**界面汉化**：顶栏菜单、侧栏、输入框、设置页（通用 / 外观 / 快捷键 / 模型 / 自定义 / 浏览器 / 对话 / 反馈 / 账号）、额度提示、常用按钮。对话正文、代码、输入框内容不翻译，产品名与模型名保留英文。
+- 安装时会**关闭后台自动更新检查**，避免新版本覆盖补丁；菜单里的手动「检查更新」仍可用。
+
+文件：`inject.js` / `inject.css` / `install.py` / `install.bat` / `restore.bat`。详细变更见 [CHANGELOG.md](CHANGELOG.md)。
+
+## 组件二：流体挡位插件（gear-shifter）
+
+- 打开反重力后自动在**模型选择器右侧**挂载 `176px × 22px` 的四档流体滑轨：`LOW` / `MED` / `HIGH` / `EXTRA`，档位字母外置在轨道下方。
+- WebGL2 粒子流体引擎：单向从左向右流动，Domain-Warped 流体基底 + 星芒闪烁；原生弹簧阻尼手感（Stiffness 520 / Damping 38）。
+- 默认配色：**白 / 黑 / 紫 / 红**。在滑块上**右键**可为当前档位换色（红 / 黑 / 紫 / 蓝 / 绿 / 宇宙色 / 白），支持恢复默认，自动本地持久化。
+- 自动识别并剥离模型按钮原有的 `(Low)` / `(Med)` / `(High)` / `(XHigh)` / `(Extra)` 后缀，并适当增高输入框区域。
+
+完整说明见 [gear-shifter/README.md](gear-shifter/README.md)，独立预览页面 [gear-shifter/preview.html](gear-shifter/preview.html)。
 
 ---
 
 ## 安装
 
-从 [Releases](../../releases) 下载 `agy-cn-v*.zip` 并解压，双击 `install.bat`（或命令行 `python install.py`），然后**从托盘完整退出 Antigravity 再重新打开**。
+从 [Releases](../../releases) 下载 `agy-cn-v*.zip` 和 `antigravity-gear-shifter.zip`，分别解压。
 
-安装脚本会做四件事：
+> **顺序必须这样**：① 先装额度电池 → ② 再装流体挡位。
+> 原因是额度电池的安装器会基于官方 `app.asar` 备份重建 `preload.js`；如果先装挡位再装电池，挡位注入会被冲掉。
 
-| 步骤 | 内容 |
-| --- | --- |
-| 1 | 备份 `resources\app.asar` → `app.asar.agyq-backup`（应用版本变了会自动重建备份） |
-| 2 | 把 `inject.js` / `inject.css` **内联**进 asar 里的 `dist/preload.js` |
-| 3 | 由 preload 在每次页面加载时用 `webFrame.executeJavaScript` 注入到主世界 |
-| 4 | **关闭后台自动更新检查**（改 `dist/updater.js`），避免升级把补丁冲掉 |
+```powershell
+# 1) 额度电池：解压后双击 install.bat，或
+python install.py
 
-> 为什么是内联：Electron 20 起 renderer 默认 `sandbox: true`，preload 里 **没有 `fs`**（`require('fs')` 会报 `module not found: fs`），读不了外部文件，只能把脚本塞进 preload 本身。
+# 2) 流体挡位：解压后
+powershell -ExecutionPolicy Bypass -File .\install.ps1
+# 或零依赖 Node 方式
+node patch-asar.mjs install "C:\Users\glb\AppData\Local\Programs\antigravity\resources\app.asar"
+```
+
+然后从**托盘完整退出 Antigravity**（关窗口不算）并重新打开。
+
+> 齿轮插件的安装脚本需要 Node.js；电池包自带 Python 安装器，不强依赖 PATH 里的 Python。
 
 ## 卸载
 
-双击 `restore.bat`（或 `python install.py --restore`），重启应用即可恢复官方状态。
+按相反顺序操作：
 
-`python install.py --check` 可以查看当前是否已安装。
-
----
-
-## 额度电池怎么取数
-
-数据来自应用自己的接口：
-
-```
-POST /exa.language_server_pb.LanguageServerService/GetUserStatus
+```powershell
+# 1) 去掉挡位插件
+powershell -ExecutionPolicy Bypass -File .\uninstall.ps1
+# 2) 还原电池包（恢复官方 app.asar）
+restore.bat   # 或 python install.py --restore
 ```
 
-返回里的 `cascadeModelConfigData.clientModelConfigs[]` 每个模型带 `quotaInfo`，配合 `planStatus` 的共享积分：
+`python install.py --check` 可查看电池包版本、补丁状态和自动更新状态。
 
-- 某厂商模型**有** `remainingFraction` → 取该厂商所有模型里**最低**的那个百分比（Gemini、4Argon 属于这类，各自独立额度）。
-- 某厂商模型**没有** `remainingFraction` → 用「共享积分」的剩余比例（Claude / GPT 这类走 Pro 套餐积分池）。
-- **Gemini 4 Argon 单独一块电池**（v1.2 起）：Argon 的周额度独立于普通 Gemini，不共用额度池。模型 ID 或名称里带 `argon` 的归 4Argon 电池（Gemini 归类时已用负向匹配排除），所以 Gemini 电池不再被 Argon 的用量拉低。
-- 账号 / 套餐里**没有**某厂商的模型时，对应电池自动隐藏。
-- 每 60 秒自动刷新一次；切回窗口、点击组件时也会立即刷新。
+## 兼容性
 
-颜色：Claude `#FF8A3D`、GPT `#F0F0F0`、Gemini `#A98BFF`、4Argon `#4A9EFF`。低于 15% 数字变橙，归零时电池边框呼吸闪烁。
+- 适配 Windows 桌面版 Antigravity **v2.33.0**（2.24 / 2.25 也曾验证过早期版本）。
+- 应用自动更新或重装会覆盖 `app.asar`，两个补丁都会失效 —— 重新按上面的顺序跑一次安装即可。
+- 本仓库仅修改客户端的 `app.asar`，不碰你的对话记录、工作区和 Google 账号数据。
 
-![设置页汉化](preview-settings.png)
+## 目录
 
-## 汉化怎么改
-
-`inject.js` 里有两个地方可以扩展：
-
-```js
-const DICT = { 'New Conversation': '新建对话', ... };   // 精确匹配
-const RULES = [ [/^Worked for (.+)$/, '工作用时 $1'], ... ]; // 带变量的句子
+```
+README.md                     本说明
+inject.js / inject.css        额度电池 + 汉化的注入脚本与样式
+install.py / install.bat      电池包安装器（备份 / 补丁 / 关自动更新）
+restore.bat                   电池包卸载
+preview.png / preview-settings.png  效果预览
+CHANGELOG.md                  电池包变更日志
+gear-shifter/                 流体挡位插件完整源码与安装脚本
 ```
 
-改完词条要重新跑一次 `install.py`（脚本会重新内联进 asar），然后**重启应用**生效。
-
-**不会翻译的区域**（`SKIP_SEL`）：`code` / `pre` / `textarea` / `contenteditable` / `.markdown` / `.prose` / 对话气泡（`turn-cards-container`）/ 侧栏对话标题（`conversation-row-sidebar`）/ 用户输入（`user-input-step`）。这样聊天记录和代码永远保持原样。
-
----
-
-## 已知情况
-
-- **自动更新已被关闭**（`startAutoUpdateChecks` 改成空函数）：应用不会再后台检查/下载新版本，补丁也就不会被覆盖。
-  菜单里手动的「检查更新」仍然可用；想彻底恢复自动更新，跑 `restore.bat` 还原官方 `app.asar` 即可。
-- 如果哪天手动升级了应用（或重装），补丁会失效 —— 重新跑一次 `install.bat` 就行，它会检测到新版本并用当前文件重建备份。
-- 当前适配 **Antigravity v2.33.0**；设置页（通用/外观/快捷键/模型/自定义/浏览器/对话/反馈/账号）已整体汉化。
-- 汉化是 DOM 层的，少数动态提示（输入框轮播的 hint）在切换瞬间可能出现一次英文/中英混排，下一帧会恢复。
-- 模型名和档位（`Gemini 4 Argon`、`Medium` / `High`）故意保留英文，避免和额度对照时认错。
-- 如果窗口里看不到组件：应用内按 `Ctrl+Shift+I` 打开开发者工具，控制台里 `[agy-cn]` 开头的日志会说明原因（正常应看到 `preload bootstrap ok`，每次拉数还会打印 `[agy-cn] 模型配置：` 的模型清单）。
-- **改完 asar 必须完整退出应用再打开**（托盘 → Quit），只刷新页面会读到旧缓存，出现 `Unable to load preload script ... SyntaxError`。
-
-## 变更日志
-
-见 [CHANGELOG.md](CHANGELOG.md)。
-
-## 免责声明
-
-本项目为非官方第三方增强补丁，与 Google / Antigravity 官方无关。脚本会修改本地 `app.asar`，请知悉风险并自行承担；补丁只读写本地文件，不上传任何数据。
-
-## License
-
-[MIT](LICENSE)
+MIT License.

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Antigravity Fluid Gear Shifter Preview</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+</head>
+<body class="bg-[#0b0d12] text-[#f3f4f6] min-h-screen flex items-center justify-center p-6">
+  <div class="max-w-2xl w-full rounded-2xl border border-white/10 bg-[#12151e] p-6 space-y-5 shadow-2xl">
+    <div class="border-b border-white/10 pb-3">
+      <h1 class="text-base font-semibold">Antigravity 反重力流体挡位插件</h1>
+      <p class="text-xs text-white/50 mt-1">对话框自动增高 · 28px 加粗流体条与模型选择器严格齐平 · 档位字母位于更下方 · 右键滑块可切红(默认)/黑/紫/蓝/绿</p>
+    </div>
+    <div class="rounded-xl border border-white/10 bg-[#0d1017] p-3 flex flex-col justify-between">
+      <textarea rows="2" placeholder="输入指令…" class="w-full bg-transparent text-xs text-white/90 outline-none resize-none"></textarea>
+      <div class="flex items-center justify-between border-t border-white/10 pt-2">
+        <div class="flex items-center gap-1.5">
+          <button type="button" class="inline-flex items-center h-[28px] px-3 rounded-md text-xs font-medium bg-[#171b26] border border-white/10 text-white">
+            <span>Gemini 4 Neon (XHigh)</span>
+          </button>
+        </div>
+        <span class="text-xs text-white/40 font-mono">右键流体滑块可换色</span>
+      </div>
+    </div>
+  </div>
+  <script src="./src/antigravity-gear-shifter.js"></script>
+</body>
+</html>

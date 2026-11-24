@@ -672,7 +672,6 @@
   /* ============================ 3. 额度小组件 ============================ */
   const VENDORS = [
     { id: 'claude', name: 'Claude', color: '#FF8A3D', agg: 'min' },
-    { id: 'gpt', name: 'GPT', color: '#F0F0F0', agg: 'min' },
     { id: 'gemini', name: 'Gemini', color: '#A98BFF', agg: 'max' },
     // Gemini 4 Argon 有独立周额度，单独一块电池
     { id: 'argon', name: '4Argon', color: '#4A9EFF', agg: 'min' },
@@ -807,12 +806,24 @@
       const resets = bucket.models.map((m) => m.reset).filter(Boolean).map((s) => Date.parse(s)).filter((n) => !isNaN(n));
       if (resets.length) bucket.reset = Math.min(...resets);
     }
+
+    // Gemini 与 4Argon 可能共用同一额度池：剩余比例与重置时间一致时视为合并，
+    // 隐藏重复的 Argon 电池，并在 Gemini 明细里标注。分开时仍然显示两块。
+    const g = next.gemini, a = next.argon;
+    if (g && a && g.models.length && a.models.length &&
+        g.level !== null && a.level !== null &&
+        Math.abs(g.level - a.level) < 1e-6 &&
+        (g.reset === a.reset || (g.reset && a.reset && Math.abs(g.reset - a.reset) < 60000))) {
+      g.merged = true;
+      a.hidden = true;
+    }
     state.vendors = next;
     state.hasData = true;
   }
 
-  // 账号里完全没有该厂商的模型（比如套餐不含 4Argon）→ 隐藏这块电池
+  // 账号里没有该厂商模型，或 Gemini/Argon 已合并 → 隐藏这块电池
   function isAbsent(b) {
+    if (!b || b.hidden) return true;
     return Array.isArray(b.models) && b.models.length === 0 && b.level === null;
   }
 

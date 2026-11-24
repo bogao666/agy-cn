@@ -1,0 +1,11 @@
+{
+  "name": "antigravity-gear-shifter",
+  "displayName": "Antigravity Fluid Gear Shifter (反重力流体挡位插件)",
+  "version": "1.0.0",
+  "description": "在模型选择右侧自动挂载左右拖动四档调节器 (LOW / MED / HIGH / EXTRA)，最高档 EXTRA 为赤红粒子流体，其余档位为纯白流体粒子，联动切换 Agent 算力与思考深度。",
+  "suggestedPrompts": [
+    "切换当前算力挡位至 EXTRA 满血红流模式",
+    "打开反重力流体挡位交互面板预览",
+    "查看当前四档算力模式 (LOW/MED/HIGH/EXTRA) 的推理策略"
+  ]
+}

@@ -1,5 +1,19 @@
 # 变更日志
 
+## v1.6 (2026-11-24)
+
+- 去掉 Gemini 悬浮明细里的「含 Argon」标注。
+- **移除 GPT 白色电池**：顶栏只保留 Claude（橙）与 Gemini（紫）；额度交互与其余汉化不变。
+
+
+## v1.5 (2026-11-24)
+
+- **Gemini 额度合并**：现在 Neon / Argon / Hydrogen / Flash 共用同一额度池（`remainingFraction` 与重置时间一致）。
+  检测到合并时自动隐藏重复的 4Argon 电池，并在 Gemini 悬浮明细里标注「含 Argon」；
+  若以后额度重新拆分，两块电池会自动恢复。
+- 实测：Claude 14% / GPT 14% / Gemini 89%（含 Argon），与接口一致。
+
+
 ## v1.4 (2026-11-22)
 
 - 修复新版模型归类：`gemini-pro-orchestrator-g1-pro`（显示名 `Orchestrator (Argon)`）不再被塞进 Gemini 桶，Argon 优先按显示名判定。
