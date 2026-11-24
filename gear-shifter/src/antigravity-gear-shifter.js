@@ -1107,7 +1107,8 @@
     let node = el ? el.parentElement : null;
     for (let depth = 0; depth < 10 && node && node !== document.body && node !== document.documentElement; depth++) {
       const editor = node.querySelector('textarea, [contenteditable="true"], [role="textbox"]');
-      if (editor) {
+      // 严禁把包含 el 自身的可编辑区域当成“找到了输入框”（el 必须位于输入框之外的工具栏）
+      if (editor && editor !== el && !editor.contains(el) && !el.contains(editor)) {
         return { composer: node, editor };
       }
       node = node.parentElement;
@@ -2239,7 +2240,18 @@
     );
 
     for (const el of candidates) {
-      // 严禁在下拉菜单、弹窗、选项列表或插件自身内部重复挂载！
+      // 1. 严禁把富文本输入框、textarea、input 或其内部任意节点当成模型按钮！
+      //    （Antigravity 的富文本编辑器带 role="combobox" 用于 @ / 自动补全，输入 "gemini" 时绝不能误挂载）
+      if (
+        el.isContentEditable ||
+        el.matches('textarea, input, [contenteditable="true"], [role="textbox"]') ||
+        el.closest('textarea, input, [contenteditable="true"], [role="textbox"]') ||
+        el.querySelector('textarea, input, [contenteditable="true"], [role="textbox"]')
+      ) {
+        continue;
+      }
+
+      // 2. 严禁在下拉菜单、弹窗、选项列表或插件自身内部重复挂载！
       if (
         el.closest(
           '.ag-gear-shifter-host, .ag-gear-ctx-menu, [role="menu"], [role="listbox"], [role="dialog"], [role="menuitem"], [role="option"], [data-radix-popper-content-wrapper], [data-floating-ui-portal], [data-ag-stealth-popover="true"]'
@@ -2252,9 +2264,10 @@
       }
 
       const text = (el.textContent || '').trim();
+      // 3. 要求文本以真实模型族名称开头（而非一句话里顺带提到 gemini），避免误匹配普通文本/附件胶囊
       const isModelSelector =
-        /(?:Gemini|Argon|Neon|Carbon|Hydrogen|Orchestrator|Flash|Pro|Claude|Sonnet|Opus|GPT)/i.test(text) &&
-        text.length < 64 &&
+        /^\s*(?:Gemini|Claude|GPT|Orchestrator|Argon|Neon|Carbon|Hydrogen)\b/i.test(text) &&
+        text.length < 48 &&
         el.children.length < 12;
 
       if (!isModelSelector) continue;
@@ -2310,7 +2323,7 @@
         if (!t) continue;
         if (
           t.closest(
-            '.ag-gear-shifter-host, .ag-gear-ctx-menu, [role="menu"], [role="listbox"], [data-radix-popper-content-wrapper], [data-floating-ui-portal]'
+            '.ag-gear-shifter-host, .ag-gear-ctx-menu, [contenteditable="true"], [role="textbox"], textarea, input, [role="menu"], [role="listbox"], [data-radix-popper-content-wrapper], [data-floating-ui-portal]'
           )
         ) {
           continue;
