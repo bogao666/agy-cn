@@ -2,7 +2,7 @@
 
 [![Version](https://img.shields.io/badge/version-v1.6-4A9EFF)](../../releases)
 [![Platform](https://img.shields.io/badge/platform-Windows-blue)](#安装)
-[![Antigravity](https://img.shields.io/badge/Antigravity-v2.33.0-A98BFF)](https://antigravity.google)
+[![Antigravity](https://img.shields.io/badge/Antigravity-v2.35.2-A98BFF)](https://antigravity.google)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 给 **Google Antigravity 桌面版** 做界面增强。一个仓库，两个组件：
@@ -76,7 +76,8 @@ restore.bat   # 或 python install.py --restore
 
 ## 兼容性
 
-- 适配 Windows 桌面版 Antigravity **v2.33.0**（2.24 / 2.25 也曾验证过早期版本）。
+- 适配 Windows 桌面版 Antigravity **v2.35.2**（2.33 / 2.25 / 2.24 也验证过）。
+- 已在 v2.35.2 上完整重装验证：电池包 + 汉化、关闭自动更新、流体挡位插件均正常。
 - 应用自动更新或重装会覆盖 `app.asar`，两个补丁都会失效 —— 重新按上面的顺序跑一次安装即可。
 - 本仓库仅修改客户端的 `app.asar`，不碰你的对话记录、工作区和 Google 账号数据。
 
