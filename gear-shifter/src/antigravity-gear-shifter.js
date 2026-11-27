@@ -266,14 +266,20 @@
         overflow: visible !important;
       }
 
-      /* 静默切换真实原生下拉菜单时短暂隐藏菜单闪屏 */
+      /* 静默切换真实原生下拉菜单时短暂隐藏菜单闪屏，并用 pointer-events: none 彻底隔绝真实鼠标误点/误悬停到隐藏菜单（如 Orchestrator） */
       html.ag-gear-stealth-switching [role="menu"],
+      html.ag-gear-stealth-switching [role="menu"] *,
       html.ag-gear-stealth-switching [role="listbox"],
+      html.ag-gear-stealth-switching [role="listbox"] *,
       html.ag-gear-stealth-switching [role="dialog"][data-state="open"],
       html.ag-gear-stealth-switching [data-radix-popper-content-wrapper],
+      html.ag-gear-stealth-switching [data-radix-popper-content-wrapper] *,
       html.ag-gear-stealth-switching [data-floating-ui-portal],
-      html.ag-gear-stealth-switching [data-ag-stealth-popover="true"] {
+      html.ag-gear-stealth-switching [data-floating-ui-portal] *,
+      html.ag-gear-stealth-switching [data-ag-stealth-popover="true"],
+      html.ag-gear-stealth-switching [data-ag-stealth-popover="true"] * {
         opacity: 0 !important;
+        pointer-events: none !important;
         transition: none !important;
         animation: none !important;
       }
@@ -1748,7 +1754,50 @@
     return null;
   }
 
-  function findTargetOptionInItems(items, baseModelName, targetGearId) {
+  const MODEL_IDENTITY_TOKENS = [
+    'orchestrator',
+    'gemini',
+    'claude',
+    'gpt',
+    'opus',
+    'sonnet',
+    'argon',
+    'carbon',
+    'hydrogen',
+    'neon',
+    'flash'
+  ];
+
+  // 严格模型身份守卫：确保待点击项绝不属于其他模型（例如当前是 Gemini 4 Neon 时绝不允许误点 Orchestrator 或其他模型）
+  function isOptionSafeForModel(el, baseNorm) {
+    if (!el || !el.isConnected) return false;
+    const text = getElementTextSegments(el).join(' ').toLowerCase();
+    if (!text) return false;
+    if (/\borchestrator\b/i.test(text) && !baseNorm.includes('orchestrator')) {
+      return false;
+    }
+    for (const tok of MODEL_IDENTITY_TOKENS) {
+      const re = new RegExp(`\\b${tok}\\b`, 'i');
+      if (re.test(text) && (!baseNorm || !re.test(baseNorm))) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  function menuLooksLikeModelList(items) {
+    let modelRows = 0;
+    for (const el of items) {
+      const t = getElementTextSegments(el).join(' ');
+      if (/\b(?:Gemini|Orchestrator|Claude|GPT)\b/i.test(t) && t.length < 160) {
+        modelRows++;
+        if (modelRows >= 2) return true;
+      }
+    }
+    return false;
+  }
+
+  function findTargetOptionInItems(items, baseModelName, targetGearId, allowStandaloneGear = true) {
     const baseNorm = (baseModelName || '').toLowerCase().replace(/\s+/g, ' ').trim();
     const pickDeepest = (list) => {
       if (!list.length) return null;
@@ -1762,11 +1811,12 @@
       for (const el of items) {
         if (itemContainsMultipleGears(el)) continue;
         if (getItemExactGear(el) !== targetGearId) continue;
+        if (!isOptionSafeForModel(el, baseNorm)) continue;
         // 向上查找最多 4 层，看是否处于当前模型的行容器中
         let anc = el.parentElement;
         for (let i = 0; i < 4 && anc && anc !== document.body; i++) {
           const ancText = getElementTextSegments(anc).join(' ').toLowerCase();
-          if (ancText.includes(baseNorm) && ancText.length < 260) {
+          if (ancText.includes(baseNorm) && ancText.length < 260 && isOptionSafeForModel(anc, baseNorm)) {
             inlineMatches.push(el);
             break;
           }
@@ -1781,6 +1831,7 @@
       const combinedMatches = [];
       for (const el of items) {
         if (itemContainsMultipleGears(el)) continue;
+        if (!isOptionSafeForModel(el, baseNorm)) continue;
         const segs = getElementTextSegments(el);
         if (!segs.length) continue;
         const joined = segs.join(' ');
@@ -1809,15 +1860,18 @@
       if (combinedMatches.length) return pickDeepest(combinedMatches);
     }
 
-    // 策略 2：弹窗中的独立档位选项（例如顶部/底部的 Effort 切换栏，或纯档位菜单）
-    const exactMatches = [];
-    for (const el of items) {
-      if (itemContainsMultipleGears(el)) continue;
-      if (getItemExactGear(el) === targetGearId) {
-        exactMatches.push(el);
+    // 策略 2：弹窗中的独立档位选项（仅在纯档位子菜单或非多模型主列表中启用，严防误点主列表里的其他模型）
+    if (allowStandaloneGear && !menuLooksLikeModelList(items)) {
+      const exactMatches = [];
+      for (const el of items) {
+        if (itemContainsMultipleGears(el)) continue;
+        if (!isOptionSafeForModel(el, baseNorm)) continue;
+        if (getItemExactGear(el) === targetGearId) {
+          exactMatches.push(el);
+        }
       }
+      if (exactMatches.length) return pickDeepest(exactMatches);
     }
-    if (exactMatches.length) return pickDeepest(exactMatches);
 
     return null;
   }
@@ -1828,18 +1882,24 @@
     const candidates = [];
     for (const el of items) {
       if (el.querySelectorAll('button, [role="menuitem"], [role="option"]').length >= 2) continue;
+      if (!isOptionSafeForModel(el, baseNorm)) continue;
       const segs = getElementTextSegments(el);
       if (!segs.length) continue;
+      const firstSeg = segs[0].toLowerCase().replace(/\s+/g, ' ').trim();
       const joined = segs.join(' ');
       const lower = joined.toLowerCase();
       if (!lower.includes(baseNorm)) continue;
       if (joined.length > 160) continue;
+      const exactPrefix =
+        firstSeg === baseNorm || firstSeg.startsWith(baseNorm + ' ') || firstSeg.startsWith(baseNorm + '(');
       const isMenuItem = el.matches('button, [role="menuitem"], [role="menuitemradio"], [role="option"]');
-      candidates.push({ el, isMenuItem, depth: getDomDepth(el) });
+      candidates.push({ el, exactPrefix, isMenuItem, depth: getDomDepth(el) });
     }
     if (!candidates.length) return null;
-    // Radix SubTrigger 的 hover/pointermove 绑定在行级 menuitem/button（较浅层级）上
-    candidates.sort((a, b) => Number(b.isMenuItem) - Number(a.isMenuItem) || a.depth - b.depth);
+    // 优先首段精确前缀匹配 & Radix SubTrigger 浅层行容器
+    candidates.sort(
+      (a, b) => Number(b.exactPrefix) - Number(a.exactPrefix) || Number(b.isMenuItem) - Number(a.isMenuItem) || a.depth - b.depth
+    );
     return candidates[0].el;
   }
 
@@ -1945,7 +2005,8 @@
         if (activeRoots.length > 0) {
           popoverOpened = true;
           items = collectClickableItems(activeRoots, modelBtn);
-          targetEl = findTargetOptionInItems(items, baseModelName, gearObj.id);
+          // 一级菜单若为多模型列表，禁用泛化策略 2（必须先定位当前模型或展开其子菜单）
+          targetEl = findTargetOptionInItems(items, baseModelName, gearObj.id, !menuLooksLikeModelList(items));
           if (targetEl) break;
           // 等多一帧让异步子菜单/列表项渲染完整
           if (items.length > 0 && t >= 4) break;
@@ -1953,7 +2014,7 @@
       }
 
       // 2. 若一级菜单展示的是模型列表（如 Antigravity 的 "Gemini 4 Neon High ✓" 级联菜单），
-      //    悬停/右箭头/点击当前模型行展开二级档位子菜单，并严格只在新增的子菜单项中匹配目标档位
+      //    悬停/右箭头展开当前模型行的二级档位子菜单，并严格只在新增的子菜单项中匹配目标档位
       if (!targetEl && popoverOpened && items.length > 0) {
         const level1Items = new Set(items);
         const modelRow = findModelRowInItems(items, baseModelName);
@@ -1963,7 +2024,7 @@
             const allNow = collectClickableItems(activeRoots, modelBtn);
             const subItems = allNow.filter((it) => !level1Items.has(it));
             if (subItems.length > 0) {
-              const hit = findTargetOptionInItems(subItems, baseModelName, gearObj.id);
+              const hit = findTargetOptionInItems(subItems, baseModelName, gearObj.id, true);
               if (hit) return hit;
             }
             return null;
@@ -1988,8 +2049,14 @@
             }
           }
 
-          // 2c. 兜底：点击模型行展开二级面板
-          if (!targetEl) {
+          // 2c. 仅当 modelRow 明确具备子菜单触发属性时才点击展开（不检查通用 data-radix-collection-item，防止误点平铺模型切换模型）
+          const rowDataState = modelRow.getAttribute('data-state');
+          const isExplicitSubTrigger =
+            modelRow.getAttribute('aria-haspopup') === 'menu' ||
+            modelRow.hasAttribute('aria-expanded') ||
+            rowDataState === 'closed' ||
+            rowDataState === 'open';
+          if (!targetEl && isExplicitSubTrigger) {
             fireRealClick(modelRow);
             for (let t = 0; t < 9; t++) {
               await sleepMs(20);
@@ -2000,8 +2067,9 @@
         }
       }
 
-      // 3. 命中真实选项 -> 模拟真实点击切换！
-      if (targetEl) {
+      // 3. 命中真实选项 -> 最终模型身份硬校验，确认绝不误切到 Orchestrator 或其他模型后再模拟点击
+      const baseNorm = (baseModelName || '').toLowerCase().replace(/\s+/g, ' ').trim();
+      if (targetEl && isOptionSafeForModel(targetEl, baseNorm)) {
         fireRealClick(targetEl);
         matched = true;
         await sleepMs(65);
@@ -2408,17 +2476,29 @@
     const endDrag = (e) => {
       if (!state.dragging) return;
       state.dragging = false;
+      e.preventDefault();
+      e.stopPropagation();
       try {
         capsule.releasePointerCapture(e.pointerId);
       } catch (_) {}
       const finalIdx = Math.round(state.pos * 3);
       // 单次触发真实切换（避免之前 selectGearByIndex + syncAntigravityGear 重复调用两次！）
       const shouldSync = finalIdx !== dragStartIndex || finalIdx !== activeIndex;
-      selectGearByIndex(finalIdx, shouldSync, shouldSync);
+      // 立即完成视觉吸附，但推迟 16ms 再打开静默原生菜单，彻底避开松手瞬间的尾随 mouseup/click 误点隐藏菜单里的 Orchestrator
+      selectGearByIndex(finalIdx, false, false);
+      if (shouldSync) {
+        setTimeout(() => {
+          selectGearByIndex(finalIdx, true, true);
+        }, 16);
+      }
     };
 
     capsule.addEventListener('pointerup', endDrag);
     capsule.addEventListener('pointercancel', endDrag);
+    capsule.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    });
 
     capsule.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
