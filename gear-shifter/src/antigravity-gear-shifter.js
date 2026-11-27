@@ -18,13 +18,13 @@
   window.__ANTIGRAVITY_GEAR_SHIFTER_LOADED__ = true;
 
   const STORAGE_KEY = 'ag_fluid_gear_level_v1';
-  const COLOR_STORAGE_KEY = 'ag_fluid_gear_colors_v2';
+  const COLOR_STORAGE_KEY = 'ag_fluid_gear_colors_v3';
 
   const DEFAULT_GEAR_COLORS = {
     low: 'white',
-    med: 'black',
-    high: 'purple',
-    extra: 'red'
+    med: 'white',
+    high: 'black',
+    extra: 'purple'
   };
 
   const COLOR_THEMES = {
@@ -90,21 +90,21 @@
     },
     purple: {
       id: 'purple',
-      name: '紫色',
-      swatch: '#7e22ce',
-      border: 'rgba(168, 85, 247, 0.86)',
-      glow: 'rgba(126, 34, 206, 0.48)',
-      thumbBg: 'linear-gradient(180deg, rgba(224, 190, 255, 0.24) 0%, rgba(126, 34, 206, 0.16) 100%)',
-      thumbBorder: 'rgba(216, 180, 254, 0.58)',
-      thumbCore: 'rgba(242, 224, 255, 0.92)',
-      thumbShadow: '0 0 10px rgba(147, 51, 234, 0.62), inset 0 1px 0 rgba(236, 214, 255, 0.45)',
-      labels: ['#f7e0ff', '#d094ff', '#9333ea', '#581c87'],
-      colLeft: [0.97, 0.88, 1.0],
-      colMid: [0.64, 0.24, 0.98],
-      colRight: [0.24, 0.01, 0.58],
-      crestLeft: [1.0, 0.96, 1.0],
-      crestRight: [0.46, 0.08, 0.86],
-      isDarkInk: 0.0,
+      name: '暗夜紫',
+      swatch: 'linear-gradient(135deg, #a6a1b8 0%, #52297a 52%, #1a023d 100%)',
+      border: 'rgba(176, 166, 198, 0.54)',
+      glow: 'rgba(54, 22, 96, 0.58)',
+      thumbBg: 'linear-gradient(180deg, rgba(44, 34, 62, 0.58) 0%, rgba(14, 8, 24, 0.56) 100%)',
+      thumbBorder: 'rgba(214, 206, 232, 0.44)',
+      thumbCore: 'rgba(238, 234, 248, 0.88)',
+      thumbShadow: '0 0 8px rgba(26, 10, 52, 0.78), inset 0 1px 0 rgba(235, 228, 250, 0.30)',
+      labels: ['#b8b0c8', '#9682b8', '#7556a6', '#e8e0f5'],
+      colLeft: [0.65, 0.63, 0.72],
+      colMid: [0.32, 0.16, 0.48],
+      colRight: [0.10, 0.007, 0.24],
+      crestLeft: [0.76, 0.77, 0.82],
+      crestRight: [0.21, 0.065, 0.39],
+      isDarkInk: 1.0,
       isWhiteMode: 0.0,
       isCosmos: 0.0
     },
@@ -169,7 +169,7 @@
       isCosmos: 1.0
     }
   };
-  const COLOR_ORDER = ['red', 'black', 'purple', 'blue', 'green', 'cosmos', 'white'];
+  const COLOR_ORDER = ['purple', 'black', 'white', 'red', 'blue', 'green', 'cosmos'];
 
   const GEARS = [
     {
@@ -908,7 +908,7 @@
       const t = frac * frac * (3 - 2 * frac);
 
       const themeA = COLOR_THEMES[state.gearColors[GEARS[idxA].id]] || COLOR_THEMES.white;
-      const themeB = COLOR_THEMES[state.gearColors[GEARS[idxB].id]] || COLOR_THEMES.red;
+      const themeB = COLOR_THEMES[state.gearColors[GEARS[idxB].id]] || COLOR_THEMES.purple;
       const lerp3 = (a, b, f) => [
         a[0] + (b[0] - a[0]) * f,
         a[1] + (b[1] - a[1]) * f,
@@ -948,7 +948,7 @@
 
         gl.drawArrays(gl.TRIANGLES, 0, 6);
       } else if (this.ctx2d) {
-        const activeTheme = COLOR_THEMES[state.gearColors[GEARS[state.targetIndex].id]] || COLOR_THEMES.red;
+        const activeTheme = COLOR_THEMES[state.gearColors[GEARS[state.targetIndex].id]] || COLOR_THEMES.purple;
         this.renderCanvas2DFallback(fillNorm, 1 - activeTheme.isWhiteMode, flowSpeed, activeTheme);
       }
     }
@@ -1039,6 +1039,8 @@
       swatch.style.background = theme.swatch;
       if (cid === 'black') {
         swatch.style.boxShadow = 'inset 0 0 0 1px rgba(255,255,255,0.45)';
+      } else if (cid === 'purple') {
+        swatch.style.boxShadow = '0 0 7px rgba(108, 62, 168, 0.72)';
       } else if (cid === 'cosmos') {
         swatch.style.boxShadow = '0 0 8px rgba(139, 92, 246, 0.85)';
       } else {
