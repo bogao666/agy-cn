@@ -108,49 +108,9 @@
       isWhiteMode: 0.0,
       isCosmos: 0.0
     },
-    blue: {
-      id: 'blue',
-      name: '蓝色',
-      swatch: '#2563eb',
-      border: 'rgba(59, 130, 246, 0.86)',
-      glow: 'rgba(37, 99, 235, 0.44)',
-      thumbBg: 'linear-gradient(180deg, rgba(186, 224, 255, 0.26) 0%, rgba(37, 99, 235, 0.14) 100%)',
-      thumbBorder: 'rgba(147, 197, 253, 0.58)',
-      thumbCore: 'rgba(220, 240, 255, 0.92)',
-      thumbShadow: '0 0 10px rgba(59, 130, 246, 0.58), inset 0 1px 0 rgba(205, 232, 255, 0.45)',
-      labels: ['#a8dcff', '#62b4ff', '#2b82ff', '#0b52ff'],
-      colLeft: [0.64, 0.86, 1.0],
-      colMid: [0.18, 0.56, 1.0],
-      colRight: [0.01, 0.22, 0.94],
-      crestLeft: [0.88, 0.96, 1.0],
-      crestRight: [0.20, 0.52, 1.0],
-      isDarkInk: 0.0,
-      isWhiteMode: 0.0,
-      isCosmos: 0.0
-    },
-    green: {
-      id: 'green',
-      name: '绿色',
-      swatch: '#10b981',
-      border: 'rgba(16, 185, 129, 0.86)',
-      glow: 'rgba(16, 185, 129, 0.42)',
-      thumbBg: 'linear-gradient(180deg, rgba(167, 243, 208, 0.26) 0%, rgba(16, 185, 129, 0.14) 100%)',
-      thumbBorder: 'rgba(110, 231, 183, 0.58)',
-      thumbCore: 'rgba(220, 252, 238, 0.92)',
-      thumbShadow: '0 0 10px rgba(16, 185, 129, 0.56), inset 0 1px 0 rgba(196, 250, 225, 0.45)',
-      labels: ['#a6ffcf', '#5ceba4', '#1ad478', '#00a852'],
-      colLeft: [0.65, 1.0, 0.80],
-      colMid: [0.12, 0.85, 0.48],
-      colRight: [0.0, 0.58, 0.22],
-      crestLeft: [0.88, 1.0, 0.94],
-      crestRight: [0.14, 0.88, 0.45],
-      isDarkInk: 0.0,
-      isWhiteMode: 0.0,
-      isCosmos: 0.0
-    },
     cosmos: {
       id: 'cosmos',
-      name: '宇宙色',
+      name: '星云色',
       swatch: 'radial-gradient(circle at 30% 30%, #67e8f9 0%, #6366f1 42%, #a855f7 68%, #070918 100%)',
       border: 'rgba(139, 92, 246, 0.82)',
       glow: 'rgba(99, 102, 241, 0.52)',
@@ -166,10 +126,32 @@
       crestRight: [0.92, 0.55, 1.0],
       isDarkInk: 0.0,
       isWhiteMode: 0.0,
-      isCosmos: 1.0
+      isCosmos: 1.0,
+      isBlackHole: 0.0
+    },
+    blackhole: {
+      id: 'blackhole',
+      name: '星渊视界',
+      swatch: 'radial-gradient(circle at 50% 50%, #000000 0%, #000000 38%, #fff8e6 48%, #f5a638 64%, #7c3008 82%, #000000 100%)',
+      border: 'rgba(246, 184, 96, 0.52)',
+      glow: 'rgba(232, 134, 34, 0.42)',
+      thumbBg: '',
+      thumbBorder: '',
+      thumbCore: '',
+      thumbShadow: '',
+      labels: ['#8c5b32', '#cf8638', '#f7be64', '#fff5dc'],
+      colLeft: [0.42, 0.14, 0.02],
+      colMid: [0.98, 0.60, 0.16],
+      colRight: [0.0, 0.0, 0.0],
+      crestLeft: [1.0, 0.78, 0.42],
+      crestRight: [1.0, 0.98, 0.91],
+      isDarkInk: 0.0,
+      isWhiteMode: 0.0,
+      isCosmos: 0.0,
+      isBlackHole: 1.0
     }
   };
-  const COLOR_ORDER = ['purple', 'black', 'white', 'red', 'blue', 'green', 'cosmos'];
+  const COLOR_ORDER = ['purple', 'black', 'white', 'red', 'cosmos', 'blackhole'];
 
   const GEARS = [
     {
@@ -321,7 +303,7 @@
         box-shadow:
           inset 0 1px 2px rgba(0, 0, 0, 0.88),
           0 1px 3px rgba(0, 0, 0, 0.28);
-        overflow: hidden;
+        overflow: visible;
         cursor: grab;
         touch-action: none;
         transition: border-color 0.22s ease, box-shadow 0.22s ease, background 0.22s ease;
@@ -333,18 +315,25 @@
 
       .ag-gear-canvas {
         position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
+        top: -18px;
+        bottom: -18px;
+        left: -30px;
+        right: -30px;
+        width: calc(100% + 60px);
+        height: calc(100% + 36px);
         pointer-events: none;
-        z-index: 1;
+        z-index: 2;
+      }
+
+      .ag-gear-capsule.is-blackhole-mode .ag-gear-canvas {
+        z-index: 5;
       }
 
       .ag-gear-stops {
         position: absolute;
         inset: 0;
         pointer-events: none;
-        z-index: 2;
+        z-index: 3;
       }
 
       .ag-gear-stop-dot {
@@ -370,7 +359,7 @@
         width: 9px;
         border-radius: 4px;
         pointer-events: none;
-        z-index: 3;
+        z-index: 4;
         background: linear-gradient(
           180deg,
           rgba(255, 255, 255, 0.24) 0%,
@@ -407,13 +396,20 @@
         bottom: 2.5px;
       }
 
-      /* 档位字母位于流体条正下方 (top: calc(100% + 3px))，不影响流体条与 + 号 / 模型选择器的水平居中对齐 */
+      /* 星渊视界专属：隐藏静态 CSS 拖钮，将破框 3D 流动卡冈图雅黑洞球与吸积环交由 60fps WebGL2 实时渲染 */
+      .ag-gear-thumb-pill.is-blackhole-sphere {
+        opacity: 0 !important;
+        pointer-events: none !important;
+      }
+
+      /* 档位字母位于流体条正下方 (top: calc(100% + 3px))，z-index 置顶确保清晰可读 */
       .ag-gear-external-labels {
         position: absolute;
         top: calc(100% + 3px);
         left: 0;
         right: 0;
         height: 12px;
+        z-index: 8;
         display: flex;
         align-items: center;
       }
@@ -550,6 +546,7 @@
     out vec4 fragColor;
 
     uniform vec2  u_res;
+    uniform vec2  u_pad;        // 画布向框外溢出的留白像素（用于破框 3D 卡冈图雅黑洞与爱因斯坦光拱）
     uniform float u_phase;      // 严格单调递增的积分相位 (永不倒流!)
     uniform float u_time;       // 柔和闪烁用的独立时间
     uniform float u_fill;
@@ -563,6 +560,8 @@
     uniform vec3  u_crestRight;
     uniform float u_isDarkInk;
     uniform float u_isCosmos;
+    uniform float u_isBlackHole;
+    uniform float u_bhCenterX;
 
     vec2 hash22(vec2 p) {
       vec3 p3 = fract(vec3(p.xyx) * vec3(0.1031, 0.1030, 0.0973));
@@ -672,16 +671,93 @@
       return vec2(min(1.5, bodyAcc), min(2.0, starAcc));
     }
 
+    // 丝滑低频柔光流体噪声（2 阶平滑，专用于卡冈图雅丝绸吸积环，彻底消除颗粒噪点感）
+    float silkyNoise(vec2 p) {
+      return smoothNoise(p) * 0.66 + smoothNoise(p * 2.03 + vec2(9.2, 4.7)) * 0.34;
+    }
+
+    // 真实深空宇宙繁星层：幂律星等大小分布 + 自然恒星光谱色 + 极少数亮星带纤细哈勃十字星芒 + 极慢视差漂移
+    vec3 cosmicStarLayer(vec2 px, float tileSize, float driftSpeed, float baseR, float seedOffset, float spawnProb, float spikeStrength) {
+      vec2 p = vec2(px.x - u_phase * driftSpeed, px.y);
+      float rowIdx = floor(p.y / tileSize);
+      p.x -= fract(rowIdx * 0.61803398 + hash21(vec2(rowIdx, seedOffset))) * tileSize;
+      vec2 cell = floor(p / tileSize);
+      vec2 local = fract(p / tileSize);
+      vec3 acc = vec3(0.0);
+
+      for (int oy = -1; oy <= 1; oy++) {
+        for (int ox = -1; ox <= 1; ox++) {
+          vec2 nCell = cell + vec2(float(ox), float(oy));
+          vec3 rndA = hash32(nCell + vec2(seedOffset * 19.31, seedOffset * 11.73));
+          vec3 rndB = hash32(nCell * 1.67 + vec2(seedOffset * 7.41, 29.3));
+          if (rndA.z > spawnProb) continue;
+
+          vec2 center = vec2(float(ox), float(oy)) + 0.08 + rndA.xy * 0.84;
+          vec2 diff = (local - center) * tileSize;
+          float dist = length(diff);
+
+          float mag = pow(rndB.x, 2.35);
+          float r = baseR * (0.42 + 1.25 * mag);
+          float lum = 0.28 + 1.15 * mag;
+          float breathe = 0.68 + 0.32 * sin(u_time * (0.55 + rndB.y * 1.45) + rndB.z * 6.28318);
+
+          vec3 specCol = rndB.z < 0.26
+            ? vec3(0.76, 0.88, 1.00)
+            : (rndB.z < 0.68 ? vec3(1.00, 0.99, 0.96) : (rndB.z < 0.88 ? vec3(1.00, 0.90, 0.70) : vec3(1.00, 0.74, 0.50)));
+
+          float pinCore = exp(-(dist * dist) / max(0.02, r * r * 0.42));
+          float softHalo = exp(-dist / max(0.15, r * 1.95)) * (0.24 + 0.28 * mag);
+          float starLight = (pinCore * 1.15 + softHalo) * lum * breathe;
+
+          if (spikeStrength > 0.01 && mag > 0.42) {
+            float spikeLen = r * (3.8 + 4.5 * mag);
+            float sharp = 4.2 / max(0.5, baseR);
+            float hRay = exp(-abs(diff.y) * sharp) * exp(-abs(diff.x) / max(0.4, spikeLen));
+            float vRay = exp(-abs(diff.x) * sharp) * exp(-abs(diff.y) / max(0.4, spikeLen * 0.85));
+            starLight += (hRay + vRay) * 0.48 * mag * spikeStrength * breathe;
+          }
+
+          acc += specCol * starLight;
+        }
+      }
+      return min(vec3(2.2), acc);
+    }
+
+    vec3 acesFilm(vec3 x) {
+      return clamp((x * (2.51 * x + 0.03)) / (x * (2.43 * x + 0.59) + 0.14), 0.0, 1.0);
+    }
+
+    vec3 blackbodyHDR(float e) {
+      float ce = max(0.0, e);
+      // 严格还原《星际穿越》卡冈图雅经典香槟象牙白 + 柔金杏色外缘色温
+      return vec3(0.86, 0.46, 0.16) * ce
+           + vec3(1.00, 0.82, 0.54) * pow(ce, 1.55) * 0.92
+           + vec3(1.00, 0.97, 0.91) * pow(ce, 2.35) * 0.78;
+    }
+
     void main() {
-      vec2 px = vec2(v_uv.x * u_res.x, (1.0 - v_uv.y) * u_res.y);
+      vec2 canvasRes = u_res + u_pad * 2.0;
+      vec2 px = vec2(v_uv.x * canvasRes.x - u_pad.x, (1.0 - v_uv.y) * canvasRes.y - u_pad.y);
+      float sc = u_res.y / 22.0;
+
+      // 胶囊框内部精确圆角 SDF 遮罩（常规流体严格限制在框内，黑洞本体与光环自由破框而出！）
+      vec2 innerHalf = u_res * 0.5 - vec2(0.8);
+      float cornerR = min(innerHalf.y, 5.2 * sc);
+      vec2 qBox = abs(px - u_res * 0.5) - (innerHalf - vec2(cornerR));
+      float sdfBox = length(max(qBox, 0.0)) + min(max(qBox.x, qBox.y), 0.0) - cornerR;
+      float capsuleMask = smoothstep(0.65, -0.55, sdfBox);
+
+      float edgeFadeX = smoothstep(0.0, 10.0 * sc, v_uv.x * canvasRes.x) * smoothstep(0.0, 10.0 * sc, (1.0 - v_uv.x) * canvasRes.x);
+      float edgeFadeY = smoothstep(0.0, 6.0 * sc, v_uv.y * canvasRes.y) * smoothstep(0.0, 6.0 * sc, (1.0 - v_uv.y) * canvasRes.y);
+      float canvasEdgeFade = edgeFadeX * edgeFadeY;
 
       // 1. 流畅液态前沿遮罩
       float fillEndPx = u_fill * u_res.x;
       float meniscus = sin(px.y * 0.28 - u_phase * 1.6) * 2.0
                      + cos(px.y * 0.16 - u_phase * 1.1) * 1.0;
       float effectiveEnd = fillEndPx + (u_fill > 0.96 ? 4.0 : meniscus);
-      float inFillMask = smoothstep(effectiveEnd + 4.0, effectiveEnd - 2.5, px.x);
-      if (inFillMask <= 0.002) {
+      float inFillMask = smoothstep(effectiveEnd + 4.0, effectiveEnd - 2.5, px.x) * capsuleMask;
+      if (inFillMask <= 0.002 && u_isBlackHole <= 0.005) {
         fragColor = vec4(0.0);
         return;
       }
@@ -778,9 +854,145 @@
       coloredFluid = mix(coloredFluid, cosmosColor, u_isCosmos);
       coloredAlpha = mix(coloredAlpha, clamp((0.95 + 0.05 * silkFluid) * inFillMask, 0.0, 0.99), u_isCosmos);
 
-      vec3 finalRGB = mix(coloredFluid, whiteColor, u_whiteBlend);
-      float outAlpha = mix(coloredAlpha, whiteAlpha, u_whiteBlend);
-      fragColor = vec4(finalRGB * outAlpha, outAlpha);
+      // 星渊视界专属渲染：1:1 电影实拍级《星际穿越》卡冈图雅黑洞
+      // 特征：纯黑球核 + 极细白金内光子环 + 标志性暗环护城河间隙 + 上方 Ω 形宽肩圆拱 + 下方干净半圆 U 拱 + 水平炽白香槟吸积盘（全 60fps 丝绸流动！）
+      vec4 bhPremult = vec4(0.0);
+      if (u_isBlackHole > 0.005) {
+        float bhX = u_bhCenterX;
+        float bhR = 8.4 * sc;
+        float excite = 1.0 + 0.30 * u_ignite;
+
+        float dx = px.x - bhX;
+        float dy = px.y - u_res.y * 0.5;
+        float eqY = 0.12 * bhR - dx * 0.024;
+        float r = length(vec2(dx, dy));
+        float ang = atan(dy, dx);
+
+        // 1. 极细内光子环（两道高能炽白光弧沿球缘高速环绕疾驰）
+        float pOrbit = ang - u_phase * 3.8 * excite;
+        float pFlow = silkyNoise(vec2(cos(pOrbit) * 2.6, sin(pOrbit) * 2.6 + 1.9));
+        float pPulse = pow(0.5 + 0.5 * sin(ang * 2.0 - u_phase * 4.4 * excite + pFlow * 2.4), 2.4);
+        float innerPhotonRing = exp(-pow((r - bhR * 1.00) / (0.36 * sc), 2.0)) * (0.72 + 1.65 * pPulse + 0.55 * pFlow) * excite;
+
+        // 2. 上方 Ω 形引力透镜主拱（清晰明暗层次的开普勒差速丝绸等离子流）
+        float isUpper = smoothstep(eqY + 0.85 * sc, eqY - 0.75 * sc, dy);
+        float topH = max(0.0, eqY - dy);
+
+        float R_topOut = bhR * 1.64;
+        float R_topIn  = bhR * 1.18;
+        float flatTopY = 0.85 * sc;
+        float topCurveOut = exp(-pow(abs(dx) / (R_topOut * 1.05), 2.8));
+        float topCurveIn  = exp(-pow(abs(dx) / (R_topIn * 1.04), 3.1));
+        float topOuterY = flatTopY + (R_topOut - flatTopY) * topCurveOut;
+        float topInnerY = R_topIn * topCurveIn;
+
+        float topSpan = max(1.25 * sc, topOuterY - topInnerY);
+        float uTop = (topH - topInnerY) / topSpan;
+
+        float topShear = mix(2.7, 1.35, clamp(uTop, 0.0, 1.0)) * excite;
+        float sArcTop = dx * (0.048 / sc) - u_phase * topShear;
+        float tWave1 = silkyNoise(vec2(sArcTop, uTop * 4.6 + 1.2));
+        float tWave2 = silkyNoise(vec2(sArcTop * 1.85 + 5.1, uTop * 8.4 - u_phase * 0.45));
+        float tRipple = 0.5 + 0.5 * sin(sArcTop * 2.6 + uTop * 11.0 + tWave1 * 3.8);
+        float tStreams = pow(smoothstep(0.18, 0.88, tWave1 * 0.52 + tWave2 * 0.48), 1.45);
+        float tConcentric = 0.36 + 0.64 * (0.5 + 0.5 * sin(uTop * 16.0 - u_phase * 2.2 + tWave1 * 2.8));
+
+        float topBandMask = smoothstep(-0.06, 0.16, uTop) * smoothstep(1.10, 0.62, uTop);
+        float topSoftGlow = exp(-pow(max(0.0, uTop - 0.58) / 0.36, 2.0)) * smoothstep(1.58, 0.68, uTop);
+
+        float rightWingFade = smoothstep(bhR * 3.1, bhR * 0.75, dx);
+        float leftWingFade  = smoothstep(-bhR * 3.1, -bhR * 0.75, dx);
+        float wingMask = leftWingFade * rightWingFade;
+        float topFlowMod = 0.32 + 1.48 * (tStreams * 0.65 + tRipple * 0.35) * tConcentric;
+        float topEnergy = (topBandMask * topFlowMod + topSoftGlow * (0.18 + 0.24 * tStreams))
+                        * isUpper * wingMask * (0.82 + 0.36 * topCurveOut) * excite;
+
+        // 3. 下方干净半圆形 U 拱（开普勒差速环绕奔流）
+        float underGapMask = smoothstep(eqY + 0.6 * sc, eqY + 2.3 * sc, dy);
+        float R_botIn  = bhR * 1.19;
+        float R_botOut = bhR * 1.56;
+        float uBot = (r - R_botIn) / max(1.0, R_botOut - R_botIn);
+        float botBandMask = smoothstep(-0.06, 0.16, uBot) * smoothstep(1.10, 0.62, uBot);
+        float botSoftGlow = exp(-pow(max(0.0, uBot - 0.56) / 0.34, 2.0)) * smoothstep(1.52, 0.66, uBot);
+
+        float botShear = mix(2.8, 1.4, clamp(uBot, 0.0, 1.0)) * excite;
+        float bAng = ang + u_phase * botShear;
+        float bWave1 = silkyNoise(vec2(cos(bAng) * 2.8, sin(bAng) * 2.8 + uBot * 4.2));
+        float bWave2 = silkyNoise(vec2(cos(bAng * 2.0 - 1.3) * 3.4, sin(bAng * 2.0 - 1.3) * 3.4 - uBot * 6.5));
+        float bStreams = pow(smoothstep(0.18, 0.88, bWave1 * 0.55 + bWave2 * 0.45), 1.45);
+        float bConcentric = 0.38 + 0.62 * (0.5 + 0.5 * sin(uBot * 14.0 + u_phase * 2.1 + bWave1 * 2.6));
+        float botFlowMod = 0.30 + 1.38 * bStreams * bConcentric;
+        float botEnergy = (botBandMask * botFlowMod + botSoftGlow * (0.16 + 0.22 * bStreams))
+                        * underGapMask * excite;
+
+        // 框内从左到右的「混沌黑渊 -> 暗烬铜烟 -> 暖琥珀金尘」深空渐变流（左侧彻底去蓝，呈翻涌混沌玄黑）
+        float chaosWarp = fbm(vec2(px.x * (0.026 / sc) - u_phase * 0.32, px.y * (0.095 / sc)) + (warp - 0.5) * 1.45);
+        float chaosSmoke = smoothstep(0.22, 0.86, chaosWarp);
+        float chaosVein  = smoothstep(0.50, 0.88, silkyNoise(vec2(px.x * (0.042 / sc) - u_phase * 0.50 + 3.1, px.y * (0.12 / sc) - chaosWarp * 1.8)));
+        vec3 colChaosVoid = mix(vec3(0.004, 0.004, 0.005), vec3(0.11, 0.105, 0.115), chaosSmoke * 0.65 + chaosVein * 0.45);
+        vec3 colMidEmber  = vec3(0.20, 0.10, 0.045) * (0.40 + 0.80 * chaosSmoke);
+        vec3 colNearGold  = vec3(0.60, 0.30, 0.075) * (0.35 + 0.85 * chaosSmoke + 0.25 * ribbonCrest);
+        vec3 trackFluidHDR = mix(colChaosVoid, colMidEmber, smoothstep(0.16, 0.62, xGrad));
+        trackFluidHDR = mix(trackFluidHDR, colNearGold, smoothstep(0.55, 0.98, xGrad)) * inFillMask;
+
+        // 三层极慢视差宇宙深空星海（极细微远星尘 + 中景针尖星群 + 极少数带哈勃十字星芒的亮恒星）
+        vec3 starsFar  = cosmicStarLayer(px, 4.8 * sc,  0.42 * sc, 0.34 * sc, 2.3, 0.54, 0.0);
+        vec3 starsMid  = cosmicStarLayer(px, 8.6 * sc,  0.95 * sc, 0.56 * sc, 6.7, 0.36, 0.0);
+        vec3 starsHero = cosmicStarLayer(px, 17.4 * sc, 1.75 * sc, 0.84 * sc, 13.1, 0.28, 0.95);
+        vec3 starWarmShift = mix(vec3(1.0), vec3(1.04, 0.95, 0.82), smoothstep(0.45, 0.96, xGrad));
+        vec3 deepStars = (starsFar * 0.62 + starsMid * 0.88 + starsHero * 1.25) * starWarmShift * inFillMask;
+
+        float moatMask = smoothstep(bhR * 1.02, bhR * 1.09, r) * smoothstep(bhR * 1.21, bhR * 1.12, r);
+        float moatSwirl = silkyNoise(vec2(cos(ang - u_phase * 3.2 + r * 0.18) * 3.0, sin(ang - u_phase * 3.2 + r * 0.18) * 3.0));
+        float moatTendril = moatMask * pow(moatSwirl, 2.2) * 0.35;
+
+        float softAtmos = exp(-pow(r / (bhR * 2.25), 2.0)) * 0.11 * smoothstep(bhR * 0.88, bhR * 1.38, r);
+        float innerRimVeil = exp(-pow((r - bhR * 0.94) / (1.35 * sc), 2.0)) * (0.06 + 0.05 * pFlow);
+
+        vec3 dopplerTint = mix(vec3(1.04, 0.93, 0.82), vec3(0.96, 1.00, 1.06), smoothstep(bhR * 2.0, -bhR * 2.0, dx));
+
+        float outsideShadow = smoothstep(bhR - 0.55 * sc, bhR + 0.35 * sc, r);
+        float insideShadow = 1.0 - outsideShadow;
+        vec3 bgHDR = trackFluidHDR + deepStars + blackbodyHDR(topEnergy + botEnergy + innerPhotonRing + moatTendril + softAtmos) * dopplerTint;
+        vec3 behindAndShadow = bgHDR * outsideShadow + blackbodyHDR(innerPhotonRing * 0.58 + innerRimVeil) * dopplerTint;
+
+        // 4. 仅环绕黑洞球附近的对称锋利水平香槟吸积主盘（高速明暗等离子火丝从左向右飞速掠过球前）
+        float fy = dy - eqY;
+        float frontXMask = wingMask;
+        float diskCore = exp(-(fy * fy) / (0.95 * sc * sc));
+        float diskGlow = exp(-(fy * fy) / (3.6 * sc * sc));
+
+        float nearCenter = exp(-abs(dx) / (bhR * 2.2));
+        float dSpeed = (2.65 + 1.55 * nearCenter) * excite;
+        float dCoordX = dx * (0.055 / sc) - u_phase * dSpeed;
+        float dFlow1 = silkyNoise(vec2(dCoordX, fy * (0.75 / sc) + 2.1));
+        float dFlow2 = silkyNoise(vec2(dCoordX * 1.95 + 4.9, fy * (1.40 / sc) - 1.3));
+        float dStreaks = pow(smoothstep(0.16, 0.86, dFlow1 * 0.52 + dFlow2 * 0.48), 1.35);
+        float dBands = 0.48 + 0.52 * sin(fy * (3.0 / sc) + dFlow1 * 3.2 - u_phase * 2.0);
+        float diskTexture = 0.42 + 1.55 * dStreaks * dBands;
+        float dopplerEq = mix(0.82, 1.32, smoothstep(bhR * 2.4, -bhR * 2.0, dx));
+
+        float frontEnergy = (diskCore * 1.35 * diskTexture + diskGlow * 0.32 * (0.45 + 0.85 * dStreaks))
+                          * frontXMask * dopplerEq * (0.62 + 0.58 * nearCenter) * excite;
+        float frontOpacity = clamp((diskCore * 0.95 + diskGlow * 0.30) * frontXMask * (0.52 + 0.48 * dFlow1), 0.0, 0.96);
+        vec3 frontHDR = blackbodyHDR(frontEnergy);
+
+        float underLipShadow = exp(-pow((fy - 1.35 * sc) / (0.85 * sc), 2.0)) * smoothstep(bhR * 1.35, bhR * 0.3, abs(dx));
+        behindAndShadow *= (1.0 - 0.55 * underLipShadow);
+
+        vec3 totalHDR = mix(behindAndShadow, frontHDR, frontOpacity) + frontHDR * 0.25;
+        vec3 bhRGB = acesFilm(totalHDR) * canvasEdgeFade;
+
+        float maxLum = max(bhRGB.r, max(bhRGB.g, bhRGB.b));
+        float solidRegion = max(inFillMask * 0.995, insideShadow * canvasEdgeFade);
+        float glowAlpha = clamp(smoothstep(0.012, 0.52, maxLum) * 0.96, 0.0, 0.98) * canvasEdgeFade;
+        bhPremult = vec4(bhRGB, max(solidRegion, glowAlpha));
+      }
+
+      vec3 baseRGB = mix(coloredFluid, whiteColor, u_whiteBlend);
+      float baseAlpha = mix(coloredAlpha, whiteAlpha, u_whiteBlend);
+      vec4 basePremult = vec4(baseRGB * baseAlpha, baseAlpha);
+      fragColor = mix(basePremult, bhPremult, u_isBlackHole);
     }
   `;
 
@@ -813,12 +1025,17 @@
     }
 
     resize() {
-      const rect = this.canvas.getBoundingClientRect();
-      this.width = rect.width || 176;
-      this.height = rect.height || 22;
+      const parentRect = this.canvas.parentElement ? this.canvas.parentElement.getBoundingClientRect() : null;
+      const canvasRect = this.canvas.getBoundingClientRect();
+      this.width = (parentRect && parentRect.width) || 176;
+      this.height = (parentRect && parentRect.height) || 22;
+      this.cw = canvasRect.width || this.width;
+      this.ch = canvasRect.height || this.height;
+      this.padX = Math.max(0, (this.cw - this.width) * 0.5);
+      this.padY = Math.max(0, (this.ch - this.height) * 0.5);
       this.dpr = Math.min(window.devicePixelRatio || 1, 2);
-      this.canvas.width = Math.round(this.width * this.dpr);
-      this.canvas.height = Math.round(this.height * this.dpr);
+      this.canvas.width = Math.round(this.cw * this.dpr);
+      this.canvas.height = Math.round(this.ch * this.dpr);
       if (this.gl) this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
     }
 
@@ -864,6 +1081,7 @@
       gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
 
       this.uRes = gl.getUniformLocation(prog, 'u_res');
+      this.uPad = gl.getUniformLocation(prog, 'u_pad');
       this.uPhase = gl.getUniformLocation(prog, 'u_phase');
       this.uTime = gl.getUniformLocation(prog, 'u_time');
       this.uFill = gl.getUniformLocation(prog, 'u_fill');
@@ -877,6 +1095,8 @@
       this.uCrestRight = gl.getUniformLocation(prog, 'u_crestRight');
       this.uIsDarkInk = gl.getUniformLocation(prog, 'u_isDarkInk');
       this.uIsCosmos = gl.getUniformLocation(prog, 'u_isCosmos');
+      this.uIsBlackHole = gl.getUniformLocation(prog, 'u_isBlackHole');
+      this.uBhCenterX = gl.getUniformLocation(prog, 'u_bhCenterX');
     }
 
     loop(now) {
@@ -923,6 +1143,17 @@
       const whiteBlend = themeA.isWhiteMode + (themeB.isWhiteMode - themeA.isWhiteMode) * t;
       const isDarkInk = themeA.isDarkInk + (themeB.isDarkInk - themeA.isDarkInk) * t;
       const isCosmos = (themeA.isCosmos || 0) + ((themeB.isCosmos || 0) - (themeA.isCosmos || 0)) * t;
+      const isBlackHole = (themeA.isBlackHole || 0) + ((themeB.isBlackHole || 0) - (themeA.isBlackHole || 0)) * t;
+
+      const bhScale = this.height / 22.0;
+      const leftEdge = 11.0 * bhScale;
+      const rightEdge = Math.max(leftEdge + 1, this.width - 9.0 * bhScale);
+      const bhCenterX = leftEdge + pos * (rightEdge - leftEdge);
+      let effectiveFillNorm = fillNorm;
+      if (isBlackHole > 0.05) {
+        const bhFillNorm = Math.min(1.0, (bhCenterX + 4.0 * bhScale) / Math.max(40, this.width));
+        effectiveFillNorm = fillNorm + (bhFillNorm - fillNorm) * isBlackHole;
+      }
 
       if (this.gl && this.program) {
         const gl = this.gl;
@@ -932,9 +1163,10 @@
 
         gl.useProgram(this.program);
         gl.uniform2f(this.uRes, this.width, this.height);
+        gl.uniform2f(this.uPad, this.padX || 0, this.padY || 0);
         gl.uniform1f(this.uPhase, this.flowPhase);
         gl.uniform1f(this.uTime, this.time);
-        gl.uniform1f(this.uFill, fillNorm);
+        gl.uniform1f(this.uFill, effectiveFillNorm);
         gl.uniform1f(this.uWhiteBlend, whiteBlend);
         gl.uniform1f(this.uDensity, density);
         gl.uniform1f(this.uIgnite, state.ignite);
@@ -945,6 +1177,8 @@
         gl.uniform3fv(this.uCrestRight, crestRight);
         gl.uniform1f(this.uIsDarkInk, isDarkInk);
         gl.uniform1f(this.uIsCosmos, isCosmos);
+        gl.uniform1f(this.uIsBlackHole, isBlackHole);
+        gl.uniform1f(this.uBhCenterX, bhCenterX);
 
         gl.drawArrays(gl.TRIANGLES, 0, 6);
       } else if (this.ctx2d) {
@@ -1043,6 +1277,8 @@
         swatch.style.boxShadow = '0 0 7px rgba(108, 62, 168, 0.72)';
       } else if (cid === 'cosmos') {
         swatch.style.boxShadow = '0 0 8px rgba(139, 92, 246, 0.85)';
+      } else if (cid === 'blackhole') {
+        swatch.style.boxShadow = '0 0 8px rgba(255, 136, 36, 0.85)';
       } else {
         swatch.style.boxShadow = `0 0 6px ${theme.swatch}`;
       }
@@ -1967,14 +2203,25 @@
       const cid = state.gearColors[gid] || DEFAULT_GEAR_COLORS[gid];
       const theme = COLOR_THEMES[cid] || COLOR_THEMES.white;
       const isColored = cid !== 'white';
+      const isBlackHole = cid === 'blackhole';
+
+      capsule.classList.toggle('is-blackhole-mode', isBlackHole);
+      thumbPill.classList.toggle('is-blackhole-sphere', isBlackHole);
 
       if (isColored) {
         capsule.style.borderColor = theme.border;
         capsule.style.boxShadow = `inset 0 1px 3px rgba(0, 0, 0, 0.9), 0 0 14px ${theme.glow}`;
-        thumbPill.style.background = theme.thumbBg;
-        thumbPill.style.borderColor = theme.thumbBorder;
-        thumbPill.style.boxShadow = theme.thumbShadow;
-        thumbPill.style.setProperty('--ag-thumb-core', theme.thumbCore);
+        if (isBlackHole) {
+          thumbPill.style.background = '';
+          thumbPill.style.borderColor = '';
+          thumbPill.style.boxShadow = '';
+          thumbPill.style.removeProperty('--ag-thumb-core');
+        } else {
+          thumbPill.style.background = theme.thumbBg;
+          thumbPill.style.borderColor = theme.thumbBorder;
+          thumbPill.style.boxShadow = theme.thumbShadow;
+          thumbPill.style.setProperty('--ag-thumb-core', theme.thumbCore);
+        }
       } else {
         capsule.style.borderColor = '';
         capsule.style.boxShadow = '';
@@ -2016,7 +2263,7 @@
       });
 
       const trackW = capsule.clientWidth || 176;
-      const thumbW = 9;
+      const thumbW = cid === 'blackhole' ? 16 : 9;
       const travel = trackW - thumbW - 4;
       const leftPx = 2 + Math.max(0, Math.min(1, normPos)) * travel;
       thumbPill.style.transform = `translateX(${leftPx.toFixed(1)}px)`;
