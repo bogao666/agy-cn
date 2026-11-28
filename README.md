@@ -2,7 +2,7 @@
 
 [![Version](https://img.shields.io/badge/version-v1.6-4A9EFF)](../../releases)
 [![Platform](https://img.shields.io/badge/platform-Windows-blue)](#安装)
-[![Antigravity](https://img.shields.io/badge/Antigravity-v2.35.2-A98BFF)](https://antigravity.google)
+[![Antigravity](https://img.shields.io/badge/Antigravity-v2.36.0-A98BFF)](https://antigravity.google)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 给 **Google Antigravity 桌面版** 做界面增强。一个仓库，两个组件：
